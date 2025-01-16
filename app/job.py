@@ -35,23 +35,23 @@ def get_next_batch_number(topic, endpoint, group_id):
     return batch_tracker[key]
 
 # Define Kafka Source Table
-def define_kafka_source(t_env):
-    t_env.execute_sql("""
+def define_kafka_source(t_env, topic, endpoint, group_id):
+    t_env.execute_sql(f"""
     CREATE TEMPORARY TABLE kafka_input (
         playerId STRING,
         currency STRING,
         portalId STRING,
         realBalance DECIMAL(29, 17),
         bonusBalance DECIMAL(29, 17),
-        timestamp STRING,
+        temp_timestamp STRING,
         id STRING,
         realBalanceEUR DECIMAL(29, 17),
         bonusBalanceEUR DECIMAL(29, 17)
     ) WITH (
         'connector' = 'kafka',
-        'topic' = 'balance_changes',
-        'properties.bootstrap.servers' = 'aba0379f767fc48a3b6d0ae99e95a4d7-1436743986.eu-west-1.elb.amazonaws.com:9094',
-        'properties.group.id' = 'flink-group',
+        'topic' = '{topic}',
+        'properties.bootstrap.servers' = '{endpoint}',
+        'properties.group.id' = '{group_id}',
         'format' = 'json',
         'json.ignore-parse-errors' = 'true'
     )
@@ -98,7 +98,7 @@ def process_and_insert_data(t_env, log_file_name, batch_timestamp, batch_number,
         '{kafka_endpoint}' AS flink_log_source_endpoint,
         'dummy_client_id' AS flink_log_source_client_id,
         'dummy_source_name' AS flink_log_source_name,
-        timestamp AS flink_log_event_timestamp,
+        temp_timestamp AS flink_log_event_timestamp,
         id AS bln_chg_key,
         CAST(playerId AS INT) AS bln_chg_player_id,
         CAST(portalId AS INT) AS bln_chg_portal_id,
@@ -107,7 +107,7 @@ def process_and_insert_data(t_env, log_file_name, batch_timestamp, batch_number,
         bonusBalance AS bln_chg_bonus_balance,
         realBalanceEUR AS bln_chg_real_balance_eur,
         bonusBalanceEUR AS bln_chg_bonus_balance_eur,
-        TO_TIMESTAMP(FROM_UNIXTIME(UNIX_TIMESTAMP(CAST(timestamp AS STRING), 'yyyy-MM-dd\'T\'HH:mm:ssXXX'))) AS bln_chg_timestamp
+        TO_TIMESTAMP(FROM_UNIXTIME(UNIX_TIMESTAMP(CAST(temp_timestamp AS STRING), 'yyyy-MM-dd''T''HH:mm:ssXXX'))) AS bln_chg_timestamp
     FROM kafka_input
     """)
 
@@ -125,7 +125,7 @@ def main():
     log_file_name = f"{datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')}.log"
 
     # Step 3: Define Source and Sink
-    define_kafka_source(t_env)
+    define_kafka_source(t_env, topic, endpoint, group_id)
     define_iceberg_sink(t_env, log_file_name)
 
     # Step 4: Process Data
