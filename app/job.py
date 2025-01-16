@@ -131,5 +131,7 @@ def main():
     # Step 4: Process Data
     process_and_insert_data(t_env, log_file_name, batch_timestamp, batch_number, endpoint)
 
+    print(f'Successfully saved the batch.')
+
 if __name__ == "__main__":
     main()
