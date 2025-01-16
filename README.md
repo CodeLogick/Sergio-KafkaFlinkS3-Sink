@@ -233,3 +233,10 @@ This Flink job fulfills the outlined requirements by:
 
 The modular design ensures clarity, maintainability, and extensibility for future enhancements.
 
+
+Dependencies :
+https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.17.1/flink-json-1.17.1.jar
+https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.17.1/flink-s3-fs-hadoop-1.17.1.jar
+https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.17/1.3.0/iceberg-flink-runtime-1.17-1.3.0.jar
+https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka_2.12/1.17.1/flink-connector-kafka_2.12-1.17.1.jar
+https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/1.17.1/flink-sql-connector-kafka-1.17.1.jar
